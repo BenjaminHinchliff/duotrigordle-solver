@@ -1,4 +1,3 @@
-import assert from "assert";
 import puppeteer from "puppeteer";
 import { Page } from "puppeteer";
 import swipl from "swipl";
