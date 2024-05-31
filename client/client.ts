@@ -1,8 +1,8 @@
-import assert from "assert";
 import puppeteer from "puppeteer";
 import { Page } from "puppeteer";
 import swipl from "swipl";
 import { term } from "swipl";
+import { WORDS_TARGET } from "./wordlist";
 const { list, compound, variable, serialize } = term;
 
 const CHANGELOG_CLOSE_SELECTOR = "._modal_y9oz3_1 > ._button_1xh0d_1";
@@ -12,6 +12,7 @@ const PRACTICE_LINK_SELECTOR =
 const MAIN_SELECTOR = "._main_kv0wd_1";
 const BOARDS_SELECTOR = "div._board_1277w_1";
 const CELL_SELECTOR = "div._cell_1277w_56";
+
 const KEEP_PLAYING_SELECTOR = "#root > div > div._modalWrapper_y9oz3_1._lightweight_y9oz3_37 > div._modal_y9oz3_1 > div > button:nth-child(1)"
 const STARTER_WORDS = ["TARES"];
 
@@ -35,7 +36,11 @@ async function gather_results(page: Page): Promise<string[]> {
   });
 
   const results = await Promise.all(resultsPromises);
-  assert(results.length === 32);
+  assert(
+    results.length === 32,
+    `Expected 32 boards, but found ${results.length}`
+  );
+  console.log("All board results:", results);
   return results;
 }
 
@@ -44,6 +49,29 @@ function solvedAmount(board: string[]): number {
   return (
     (solve.match(/f/g) ?? []).length + 0.5 * (solve.match(/p/g) ?? []).length
   );
+}
+
+function possibleSolutions(board, words) {
+  return words.filter((word) => {
+    return board.every((result) => {
+      return isValidSolution(word, result);
+    });
+  });
+}
+
+function isValidSolution(word, result) {
+  for (let i = 0; i < word.length; i++) {
+    if (
+      (result[i] === "f" && word[i] !== result[i]) ||
+      (result[i] === "p" &&
+        word.includes(result[i]) &&
+        word[i] !== result[i]) ||
+      (result[i] === "i" && word.includes(result[i]))
+    ) {
+      return false;
+    }
+  }
+  return true;
 }
 
 (async () => {
@@ -80,23 +108,42 @@ function solvedAmount(board: string[]): number {
 
   while (true) {
     page.click(KEEP_PLAYING_SELECTOR);
+    
+    const first_board = all_results.reduce((best_board, board) => {
+      const solvedAmountBoard = solvedAmount(board);
+      const possibleSolutionsBoard = possibleSolutions(
+        board,
+        WORDS_TARGET
+      ).length;
 
-    const most_solved_board = all_results
-      .filter((board) => solvedAmount(board) !== 5)
-      .reduce((best_board, board) =>
-        solvedAmount(board) > solvedAmount(best_board) ? board : best_board,
-      );
+      const solvedAmountBestBoard = solvedAmount(best_board);
+      const possibleSolutionsBestBoard = possibleSolutions(
+        best_board,
+        WORDS_TARGET
+      ).length;
+
+      if (
+        solvedAmountBoard >= solvedAmountBestBoard &&
+        possibleSolutionsBoard <= possibleSolutionsBestBoard &&
+        solvedAmountBoard !== 5
+      ) {
+        return board;
+      }
+      return best_board;
+    }, all_results[0]);
+
+    console.log("selected board:", first_board.at(-1));
 
     const query = serialize(
       compound("max_entropies_given", [
         list(guesses),
-        list(most_solved_board),
+        list(first_board),
         variable("ME"),
-      ]),
+      ])
     );
     console.log("querying prolog:", query);
     const ret = swipl.call(query);
-    console.log(ret);
+    console.log("result:", ret.ME);
 
     if (!ret) {
       console.error("prolog query failed!");
