@@ -1,8 +1,9 @@
+import assert from "assert";
 import puppeteer from "puppeteer";
 import { Page } from "puppeteer";
 import swipl from "swipl";
 import { term } from "swipl";
-import { WORDS_TARGET } from "./wordlist";
+// import { WORDS_TARGET } from "./wordlist";
 const { list, compound, variable, serialize } = term;
 
 const CHANGELOG_CLOSE_SELECTOR = "._modal_y9oz3_1 > ._button_1xh0d_1";
@@ -12,9 +13,10 @@ const PRACTICE_LINK_SELECTOR =
 const MAIN_SELECTOR = "._main_kv0wd_1";
 const BOARDS_SELECTOR = "div._board_1277w_1";
 const CELL_SELECTOR = "div._cell_1277w_56";
+const RESULTS_SELECTOR = "div._resultsContainer_10b87_1"
 
 const KEEP_PLAYING_SELECTOR = "#root > div > div._modalWrapper_y9oz3_1._lightweight_y9oz3_37 > div._modal_y9oz3_1 > div > button:nth-child(1)"
-const STARTER_WORDS = ["TARES"];
+const STARTER_WORDS = ["RAISE"]; // ["DECAF", "DEBAG", "MILKO", "WURST", "PHYNX"];
 
 async function gather_results(page: Page): Promise<string[]> {
   const boards = await page.$$(BOARDS_SELECTOR);
@@ -40,7 +42,6 @@ async function gather_results(page: Page): Promise<string[]> {
     results.length === 32,
     `Expected 32 boards, but found ${results.length}`
   );
-  console.log("All board results:", results);
   return results;
 }
 
@@ -51,7 +52,7 @@ function solvedAmount(board: string[]): number {
   );
 }
 
-function possibleSolutions(board, words) {
+function possibleSolutions(board: string[], words: string[]): string[] {
   return words.filter((word) => {
     return board.every((result) => {
       return isValidSolution(word, result);
@@ -59,7 +60,7 @@ function possibleSolutions(board, words) {
   });
 }
 
-function isValidSolution(word, result) {
+function isValidSolution(word: string, result: string): boolean {
   for (let i = 0; i < word.length; i++) {
     if (
       (result[i] === "f" && word[i] !== result[i]) ||
@@ -106,33 +107,13 @@ function isValidSolution(word, result) {
 
   swipl.call("['../entropy/entropy']");
 
-  while (true) {
+  while (!(await page.$(RESULTS_SELECTOR))) {
     page.click(KEEP_PLAYING_SELECTOR);
+
     
-    const first_board = all_results.reduce((best_board, board) => {
-      const solvedAmountBoard = solvedAmount(board);
-      const possibleSolutionsBoard = possibleSolutions(
-        board,
-        WORDS_TARGET
-      ).length;
+    const first_board = all_results.find(board => board.at(-1) !== 'fffff');
 
-      const solvedAmountBestBoard = solvedAmount(best_board);
-      const possibleSolutionsBestBoard = possibleSolutions(
-        best_board,
-        WORDS_TARGET
-      ).length;
-
-      if (
-        solvedAmountBoard >= solvedAmountBestBoard &&
-        possibleSolutionsBoard <= possibleSolutionsBestBoard &&
-        solvedAmountBoard !== 5
-      ) {
-        return board;
-      }
-      return best_board;
-    }, all_results[0]);
-
-    console.log("selected board:", first_board.at(-1));
+    console.log("selected board:", all_results.indexOf(first_board) + 1);
 
     const query = serialize(
       compound("max_entropies_given", [
@@ -161,5 +142,5 @@ function isValidSolution(word, result) {
     all_results.map((acc, i) => acc.push(results[i]));
   }
 
-  //await browser.close();
+  console.log("SOLVED.")
 })();

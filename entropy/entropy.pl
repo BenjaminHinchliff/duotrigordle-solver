@@ -2,7 +2,7 @@
 
 remove_first(_, [], []) :- !.
 remove_first(X, [X | Tail], Tail) :- !.
-remove_first(X, [Y | Tail], [Y | NewTail]) :- remove_first(X, Tail, NewTail).
+remove_first(X, [Y | Tail], [Y | NewTail]) :- X \= Y, remove_first(X, Tail, NewTail).
 
 count_frequency(List, Counts) :-
     msort(List, Sorted),
@@ -30,14 +30,16 @@ compute_remaining([_|Gs], [T|Ts], [R|Rs]) :-
 score([], [], _, []).
 score([G|Gs], [T|Ts], R, [S|Ss]) :-
   (   G == T ->
-      S = f
+      ( R = Rn,
+        S = f)
     ; member(G, R) ->
-      ( remove_first(G, R, R),
+      ( remove_first(G, R, Rn),
         S = p
       )
-    ; S = i
+    ; ( R = Rn,
+        S = i)
   ),
-  score(Gs, Ts, R, Ss).
+  score(Gs, Ts, Rn, Ss).
 score(G, T, S) :-
   atom_chars(G, Gc),
   atom_chars(T, Tc),
@@ -55,15 +57,16 @@ entropy(G, E) :-
   E is -NE.
 
 possible([], [], [], _).
-possible([G|Gs], [i|Ss], [W|Ws], R) :- G \= W, possible(Gs, Ss, Ws, R).
-possible([G|Gs], [p|Ss], [W|Ws], R) :- G \= W, member(G, R), possible(Gs, Ss, Ws, R).
+possible([G|Gs], [i|Ss], [W|Ws], R) :- G \= W, !, possible(Gs, Ss, Ws, R).
+possible([G|Gs], [p|Ss], [_|Ws], R) :- member(G, R), !, possible(Gs, Ss, Ws, R).
 possible([G|Gs], [f|Ss], [G|Ws], R) :- possible(Gs, Ss, Ws, R).
 
 all_possible(Gs, Ks, W) :-
-  maplist({W}/[G, K] >> (atom_chars(G, Gc), atom_chars(K, Kc), compute_remaining(Gc, W, R), possible(Gc, Kc, W, R)), Gs, Ks).
+  maplist({W}/[G, K] >> score(G, W, K), Gs, Ks).
 
 max_entropies_given(Gs, Ks, ME) :-
-  findall(E-W, (words(W), atom_chars(W, Wc), all_possible(Gs, Ks, Wc), entropy(W, E)), Es),
-  print(Es),
+  findall(W, (words(W), all_possible(Gs, Ks, W)), Ws),
+  print(Ws),
+  concurrent_maplist([W, E-W] >> entropy(W, E), Ws, Es),
   keysort(Es, SEs), % this could be improved to O(n) instead of O(nlogn) but it doesn't really matter
   reverse(SEs, [_-ME|_]).
