@@ -13,9 +13,10 @@ const PRACTICE_LINK_SELECTOR =
 const MAIN_SELECTOR = "._main_kv0wd_1";
 const BOARDS_SELECTOR = "div._board_1277w_1";
 const CELL_SELECTOR = "div._cell_1277w_56";
-const RESULTS_SELECTOR = "div._resultsContainer_10b87_1"
+const RESULTS_SELECTOR = "div._resultsContainer_10b87_1";
 
-const KEEP_PLAYING_SELECTOR = "#root > div > div._modalWrapper_y9oz3_1._lightweight_y9oz3_37 > div._modal_y9oz3_1 > div > button:nth-child(1)"
+const KEEP_PLAYING_SELECTOR =
+  "#root > div > div._modalWrapper_y9oz3_1._lightweight_y9oz3_37 > div._modal_y9oz3_1 > div > button:nth-child(1)";
 const STARTER_WORDS = ["RAISE"]; // ["DECAF", "DEBAG", "MILKO", "WURST", "PHYNX"];
 
 async function gather_results(page: Page): Promise<string[]> {
@@ -40,7 +41,7 @@ async function gather_results(page: Page): Promise<string[]> {
   const results = await Promise.all(resultsPromises);
   assert(
     results.length === 32,
-    `Expected 32 boards, but found ${results.length}`
+    `Expected 32 boards, but found ${results.length}`,
   );
   return results;
 }
@@ -110,8 +111,7 @@ function isValidSolution(word: string, result: string): boolean {
   while (!(await page.$(RESULTS_SELECTOR))) {
     page.click(KEEP_PLAYING_SELECTOR);
 
-    
-    const first_board = all_results.find(board => board.at(-1) !== 'fffff');
+    const first_board = all_results.find((board) => board.at(-1) !== "fffff");
 
     console.log("selected board:", all_results.indexOf(first_board) + 1);
 
@@ -120,7 +120,7 @@ function isValidSolution(word: string, result: string): boolean {
         list(guesses),
         list(first_board),
         variable("ME"),
-      ])
+      ]),
     );
     console.log("querying prolog:", query);
     const ret = swipl.call(query);
@@ -142,5 +142,5 @@ function isValidSolution(word: string, result: string): boolean {
     all_results.map((acc, i) => acc.push(results[i]));
   }
 
-  console.log("SOLVED.")
+  console.log("SOLVED.");
 })();
