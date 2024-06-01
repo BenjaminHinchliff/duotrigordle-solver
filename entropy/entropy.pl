@@ -56,17 +56,23 @@ entropy(G, E) :-
   foldl([P, A, R] >> (R is A + (P * log(P))), Ps, 0, NE),
   E is -NE.
 
-possible([], [], [], _).
-possible([G|Gs], [i|Ss], [W|Ws], R) :- G \= W, !, possible(Gs, Ss, Ws, R).
-possible([G|Gs], [p|Ss], [_|Ws], R) :- member(G, R), !, possible(Gs, Ss, Ws, R).
-possible([G|Gs], [f|Ss], [G|Ws], R) :- possible(Gs, Ss, Ws, R).
-
 all_possible(Gs, Ks, W) :-
   maplist({W}/[G, K] >> score(G, W, K), Gs, Ks).
 
-max_entropies_given(Gs, Ks, ME) :-
-  findall(W, (words(W), all_possible(Gs, Ks, W)), Ws),
-  print(Ws),
+all_words_all_possible(Gs, Ks, Ws) :- findall(W, (words(W), all_possible(Gs, Ks, W)), Ws).
+
+words_max_entropy(Ws, ME) :-
   concurrent_maplist([W, E-W] >> entropy(W, E), Ws, Es),
-  keysort(Es, SEs), % this could be improved to O(n) instead of O(nlogn) but it doesn't really matter
+  keysort(Es, SEs),
   reverse(SEs, [_-ME|_]).
+
+solved(Ks) :- last(Ks, L), L = 'fffff'.
+
+best_word_given(Gs, Kss, BW) :-
+  exclude(solved, Kss, UNKss),
+  concurrent_maplist({Gs}/[Ks, L-Ws] >>
+      (\+ solved(Ks), all_words_all_possible(Gs, Ks, Ws), length(Ws, L)),
+  UNKss,
+  Wss),
+  keysort(Wss, [_-Ws|_]),
+  words_max_entropy(Ws, BW).

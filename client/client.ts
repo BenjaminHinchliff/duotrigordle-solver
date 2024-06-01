@@ -109,16 +109,14 @@ function isValidSolution(word: string, result: string): boolean {
   swipl.call("['../entropy/entropy']");
 
   while (!(await page.$(RESULTS_SELECTOR))) {
-    page.click(KEEP_PLAYING_SELECTOR);
-
-    const first_board = all_results.find((board) => board.at(-1) !== "fffff");
-
-    console.log("selected board:", all_results.indexOf(first_board) + 1);
+    if (await page.$(KEEP_PLAYING_SELECTOR)) {
+      await page.click(KEEP_PLAYING_SELECTOR);
+    }
 
     const query = serialize(
-      compound("max_entropies_given", [
+      compound("best_word_given", [
         list(guesses),
-        list(first_board),
+        list(all_results.map(list)),
         variable("ME"),
       ]),
     );
