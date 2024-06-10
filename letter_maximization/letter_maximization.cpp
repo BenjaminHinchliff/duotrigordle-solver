@@ -109,7 +109,7 @@ int main()
 {
     auto start = std::chrono::high_resolution_clock::now();
 
-    std::string filename = "../wordlist.pl";
+    std::string filename = "../entropy/wordlist.pl";
 
     std::vector<word> words = read_words(filename); 
     std::cout << "Number of words: " << words.size() << std::endl;
