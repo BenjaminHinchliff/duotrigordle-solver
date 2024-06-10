@@ -66,12 +66,12 @@ words_max_entropy(Ws, ME) :-
   keysort(Es, SEs),
   reverse(SEs, [_-ME|_]).
 
-solved(Ks) :- last(Ks, L), L = 'fffff'.
+solved(Ks) :- last(Ks, L), L == 'fffff'.
 
 best_word_given(Gs, Kss, BW) :-
   exclude(solved, Kss, UNKss),
   concurrent_maplist({Gs}/[Ks, L-Ws] >>
-      (\+ solved(Ks), all_words_all_possible(Gs, Ks, Ws), length(Ws, L)),
+      (all_words_all_possible(Gs, Ks, Ws), length(Ws, L)),
   UNKss,
   Wss),
   keysort(Wss, [_-Ws|_]),
