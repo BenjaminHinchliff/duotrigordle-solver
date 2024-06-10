@@ -7,7 +7,7 @@ from math import comb
 
 
 
-wordlist_file = '../wordlist.pl'
+wordlist_file = '../entropy/wordlist.pl'
 
 with open(wordlist_file, 'r') as f:
     lines = f.read().splitlines()

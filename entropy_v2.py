@@ -78,5 +78,5 @@ print(f'Best set of words: {best_words}')
 print(f'Maximum entropy: {max_entropy}')
 
 '''
-Best set of words: ABENG, CHIKO, DRUMS, APTLY, WAQFS
+Best set of words: ABHOR, CITED, FLUNG, JUMPY, ASKEW
 '''

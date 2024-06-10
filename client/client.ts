@@ -17,7 +17,8 @@ const RESULTS_SELECTOR = "div._resultsContainer_10b87_1";
 
 const KEEP_PLAYING_SELECTOR =
   "#root > div > div._modalWrapper_y9oz3_1._lightweight_y9oz3_37 > div._modal_y9oz3_1 > div > button:nth-child(1)";
-const STARTER_WORDS = ["RAISE"]; // ["DECAF", "DEBAG", "MILKO", "WURST", "PHYNX"];
+// const STARTER_WORDS = ["RAISE"];
+const STARTER_WORDS = ["ABHOR", "CITED", "FLUNG", "JUMPY", "ASKEW"];
 
 async function gather_results(page: Page): Promise<string[]> {
   const boards = await page.$$(BOARDS_SELECTOR);
@@ -28,12 +29,12 @@ async function gather_results(page: Page): Promise<string[]> {
     }
 
     const cells = await board.$$eval(CELL_SELECTOR, (els) =>
-      els.map((el) => el.className),
+      els.map((el) => el.className)
     );
     const result = cells.slice(-10, -5);
     return result
       .map((cls) =>
-        cls.includes("green") ? "f" : cls.includes("yellow") ? "p" : "i",
+        cls.includes("green") ? "f" : cls.includes("yellow") ? "p" : "i"
       )
       .join("");
   });
@@ -41,7 +42,7 @@ async function gather_results(page: Page): Promise<string[]> {
   const results = await Promise.all(resultsPromises);
   assert(
     results.length === 32,
-    `Expected 32 boards, but found ${results.length}`,
+    `Expected 32 boards, but found ${results.length}`
   );
   return results;
 }
@@ -118,7 +119,7 @@ function isValidSolution(word: string, result: string): boolean {
         list(guesses),
         list(all_results.map(list)),
         variable("ME"),
-      ]),
+      ])
     );
     console.log("querying prolog:", query);
     const ret = swipl.call(query);
