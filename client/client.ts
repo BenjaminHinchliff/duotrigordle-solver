@@ -17,8 +17,9 @@ const RESULTS_SELECTOR = "div._resultsContainer_10b87_1";
 
 const KEEP_PLAYING_SELECTOR =
   "#root > div > div._modalWrapper_y9oz3_1._lightweight_y9oz3_37 > div._modal_y9oz3_1 > div > button:nth-child(1)";
-// const STARTER_WORDS = ["RAISE"];
-const STARTER_WORDS = ["ABHOR", "CITED", "FLUNG", "JUMPY", "ASKEW"];
+const STARTER_WORDS = ["RAISE"];
+// const STARTER_WORDS = ["ABHOR", "CITED", "FLUNG", "JUMPY", "ASKEW"];
+// const STARTER_WORDS = ["FJORD", "SWUNG", "PICKY", "AMPLY", "HERTZ"];
 
 async function gather_results(page: Page): Promise<string[]> {
   const boards = await page.$$(BOARDS_SELECTOR);

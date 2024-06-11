@@ -16,7 +16,7 @@ words = [line[7:12] for line in lines]
 
 print(words[:10])
 
-num_letter_maximizing_guesses = 2
+num_letter_maximizing_guesses = 5
 
 best_first_guesses = None
 best_num_unique_letters = 0
