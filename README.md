@@ -3,9 +3,10 @@
 
 ## Client usage
 
-Should start an instance of Puputeer-driven Chromium, with the Prolog solver running in swi-prolog via the `swipl` bridge npm library. 
+Should start an instance of Puputeer-driven Chromium, with the Prolog solver
+running in swi-prolog via the `swipl` bridge npm library. 
 
-```
+```shell
 cd client
 npm install
 npm run start
@@ -21,4 +22,20 @@ npx ts-node stats.ts RAISE
 
 ## Visualizations
 
-Visualziations can be found under the `visualization` subdirectory, along with the notebook used to create them.
+Visualziations can be found under the `visualization` subdirectory, along with
+the notebook used to create them.
+
+## Letter Maximization Usage
+
+```shell
+cd letter_maximization
+make
+./letter_maximization
+```
+
+## Greedy Letter Entropy Maximization Usage
+
+```shell
+cd entropy_greedy
+python entropy_greedy.py
+```
