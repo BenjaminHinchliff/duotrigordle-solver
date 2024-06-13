@@ -21,7 +21,7 @@ const KEEP_PLAYING_SELECTOR =
 const EXPORT_SELECTOR = "div._exportContainer_w8urc_154 > button";
 const EXPORT_TEXT_SELECTOR = "div._exportContainer_w8urc_154 > textarea";
 
-const STARTER_WORDS = ["RAISE"];
+// const STARTER_WORDS = ["RAISE"];
 // const STARTER_WORDS = ["ABHOR", "CITED", "FLUNG", "JUMPY", "ASKEW"];
 // const STARTER_WORDS = ["FJORD", "SWUNG", "PICKY", "AMPLY", "HERTZ"];
 
@@ -53,11 +53,13 @@ async function gather_results(page: Page): Promise<string[]> {
 }
 
 export class DuotrigordleSolver {
+  starters: string[]
   headless: boolean
   browser: Browser | null
   page: Page | null
 
-  constructor(headless: boolean) {
+  constructor(starters: string[], headless?: boolean) {
+    this.starters = starters
     this.headless = headless;
   }
 
@@ -93,13 +95,13 @@ export class DuotrigordleSolver {
       return
     }
 
-    const { page } = this
+    const { page, starters } = this
 
     const guesses: string[] = [];
     const all_results: string[][] = Array(32)
       .fill(null)
       .map((_) => []);
-    for (const starter of STARTER_WORDS) {
+    for (const starter of starters) {
       await page.type(MAIN_SELECTOR, starter);
       await page.keyboard.press("Enter");
 
